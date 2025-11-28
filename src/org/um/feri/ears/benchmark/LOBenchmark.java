@@ -20,12 +20,12 @@ public class LOBenchmark extends SOBenchmark<NumberSolution<Double>, NumberSolut
 
     public LOBenchmark(double drawLimit) {
         super();
-        name = "Benchmark CEC 2015";
+        name = "Custom LO Benchmark";
         this.drawLimit = drawLimit;
-        maxEvaluations = 300000;
+        maxEvaluations = 3000000;
         dimension = 30;
         timeLimit = 2500;
-        maxIterations = 2500;
+        maxIterations = 100000;
         stopCriterion = StopCriterion.EVALUATIONS;
     }
 
@@ -49,7 +49,7 @@ public class LOBenchmark extends SOBenchmark<NumberSolution<Double>, NumberSolut
         problems.add(new Sphere(dimension));
         problems.add(new Schwefel222(dimension));
         problems.add(new Schwefel12(dimension));
-        problems.add(new Schwefel221());   // V clanku je uporabljena dimenzija 30
+        // problems.add(new Schwefel221());   // V clanku je uporabljena dimenzija 30
         problems.add(new RosenbrockD2a(dimension));
         problems.add(new Step2(dimension));
         // Ne najdem noise funkcije

@@ -29,6 +29,6 @@ public class LOBenchmarkCustom {
 
         loBenchmark.addAlgorithms(algorithms);  // register the algorithms in the benchmark
 
-        loBenchmark.run(10); //start the tournament with 10 runs/repetitions
+        loBenchmark.run(30); //start the tournament with 30 runs/repetitions
     }
 }
