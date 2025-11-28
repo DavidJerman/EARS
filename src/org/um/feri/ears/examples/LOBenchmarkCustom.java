@@ -14,7 +14,7 @@ import java.util.ArrayList;
 public class LOBenchmarkCustom {
 
     public static void main(String[] args) {
-        Benchmark.printInfo = false; //prints one on one results
+        Benchmark.printInfo = true; //prints one on one results
         //add algorithms to a list
 
         ArrayList<NumberAlgorithm> algorithms = new ArrayList<NumberAlgorithm>();
@@ -23,7 +23,7 @@ public class LOBenchmarkCustom {
         algorithms.add(new ABC());
         algorithms.add(new FPA());
         algorithms.add(new BA());
-        // Ostali algoritmi: LEP-MPA, JAYA, SCA, BA, SSA
+        // Ostali algoritmi: LEP-MPA, JAYA, SCA, SSA 0 jih nisem našel v EARS
 
         LOBenchmark loBenchmark = new LOBenchmark(); // benchmark with prepared tasks and settings
 

@@ -15,7 +15,7 @@ import java.util.ArrayList;
 public class LOBenchmarkCEC2015 {
 
     public static void main(String[] args) {
-        Benchmark.printInfo = false; //prints one on one results
+        Benchmark.printInfo = true; //prints one on one results
         //add algorithms to a list
 
         ArrayList<NumberAlgorithm> algorithms = new ArrayList<NumberAlgorithm>();

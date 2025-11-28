@@ -15,19 +15,22 @@ import java.util.Comparator;
 public class LO extends NumberAlgorithm {
 
     @AlgorithmParameter(name = "population size")
-    private int popSize;
+    private final int popSize;
 
     @AlgorithmParameter(name = "jumping rate min")
-    private double jumping_rate_min;
+    private final double jumping_rate_min;
 
     @AlgorithmParameter(name = "jumping rate max")
-    private double jumping_rate_max;
+    private final double jumping_rate_max;
 
     @AlgorithmParameter(name = "debug mode")
     private boolean isDebug;
 
+    @AlgorithmParameter(name = "max iterations")
+    private int maxIt;
+
     private ArrayList<NumberSolution<Double>> population;
-    public NumberSolution<Double> bestSolution; // Stores the global best
+    public NumberSolution<Double> bestSolution; // Global best
 
     public LO() {
         this(30);
@@ -36,8 +39,9 @@ public class LO extends NumberAlgorithm {
     public LO(int popSize) {
         super();
         this.popSize = popSize;
-        this.jumping_rate_min = 0.1; //
-        this.jumping_rate_max = 0.5; //
+        this.maxIt = 10000;
+        this.jumping_rate_min = 0.5; // Parameters used in the paper
+        this.jumping_rate_max = 0.7; // Parameters used in the paper
 
         au = new Author("Ammar Kamal Abasi et al.", "");
         ai = new AlgorithmInfo("LO", "Lemurs Optimizer",
@@ -55,11 +59,12 @@ public class LO extends NumberAlgorithm {
         );
     }
 
-    public LO(int popSize, boolean debug) {
+    public LO(int popSize, boolean debug, int maxIter) {
         this.isDebug = debug;
         this.popSize = popSize;
+        this.maxIt = maxIter;
         this.jumping_rate_min = 0.1;
-        this.jumping_rate_max = 0.5;
+        this.jumping_rate_max = 0.5;  // Debug version (used for comparison) uses default matlab parameters
 
         au = new Author("Ammar Kamal Abasi et al.", "");
         ai = new AlgorithmInfo("LO", "Lemurs Optimizer",
@@ -87,7 +92,7 @@ public class LO extends NumberAlgorithm {
         // =======================================================
         if (isDebug) {
             System.out.println("--------------------------------------------------");
-            System.out.println("INITIAL SWARM (High Precision):");
+            System.out.println("INITIAL SWARM:");
             for (int i = 0; i < popSize; i++) {
                 System.out.print("Agent " + i + ": [");
                 for (int j = 0; j < task.problem.getNumberOfDimensions(); j++) {
@@ -101,7 +106,7 @@ public class LO extends NumberAlgorithm {
             System.out.println("--------------------------------------------------");
         }
 
-        int maxIt = 10000;
+        // Max interations
         if (task.getStopCriterion() == StopCriterion.ITERATIONS) {
             maxIt = task.getMaxIterations();
         } else if (task.getStopCriterion() == StopCriterion.EVALUATIONS) {
@@ -110,12 +115,13 @@ public class LO extends NumberAlgorithm {
 
         while (!task.isStopCriterion()) {
 
-            // Calculate dynamic jumping rate (decreases linearly)
+            // Compute the jumping rate
             double currentIter = task.getNumberOfIterations();
+            /// jumping_rate = jumping_rate_max - itr * ((jumping_rate_max - jumping_rate_min) / Max_iter);
             double jumping_rate = jumping_rate_max - currentIter * ((jumping_rate_max - jumping_rate_min) / maxIt);
 
-            // 1. Calculate Fitness and Rank Population
-            // LO sorts based on a specific fitness formula, not just the raw objective
+            // Sort the population based on fitness
+            /// [sorted_objctive, sorted_indexes] = sort(Fitness);
             double[] fitness = new double[popSize];
             Integer[] sortedIndices = new Integer[popSize];
 
@@ -124,13 +130,14 @@ public class LO extends NumberAlgorithm {
                 sortedIndices[i] = i;
             }
 
-            // Sort indices based on fitness values (Ascending)
             Arrays.sort(sortedIndices, Comparator.comparingDouble(i -> fitness[i]));
 
-            // 2. Main Loop over Population
-            for (int i = 0; i < popSize; i++) {
+            // Best solution is already picked in initialize, so it is not done here
 
-                // Find rank of current solution 'i' in the sorted list
+            // Main loop
+            for (int i = 0; i < popSize; i++) {
+                // Find rank of current solution
+                /// current_solution = find(sorted_indexes == i);
                 int currentRank = -1;
                 for (int k = 0; k < popSize; k++) {
                     if (sortedIndices[k] == i) {
@@ -140,7 +147,7 @@ public class LO extends NumberAlgorithm {
                 }
 
                 // Determine "Near Solution" (neighbor in rank)
-                // "near_solution_postion = current_solution - 1"
+                /// near_solution_postion = current_solution - 1
                 int nearSolutionRank = currentRank - 1;
                 if (nearSolutionRank < 0) nearSolutionRank = 0; // Boundary check: if 0, stay 0
 
@@ -148,35 +155,35 @@ public class LO extends NumberAlgorithm {
                 NumberSolution<Double> nearSol = population.get(sortedIndices[nearSolutionRank]);
 
                 // Prepare new position array
+                /// NewSol = swarm(i, :);
                 double[] newPosition = new double[task.problem.getNumberOfDimensions()];
 
-                // 3. Dimension Loop
+                // Dimension Loop (jumping logic)
                 for (int j = 0; j < task.problem.getNumberOfDimensions(); j++) {
                     double r = RNG.nextDouble(); // rand()
 
                     double currentVal = currentSol.getValue(j);
 
                     if (r < jumping_rate) {
-                        // Case 1: Dance Hub (Local Search)
-                        // Uses the "near solution" (neighbor)
+                        // Dance Hub (Local Search)
                         // NewSol(j) = swarm(i, j) + abs(swarm(i, j) - swarm(near_solution, j)) * (rand - 0.5) * 2;
                         double nearVal = nearSol.getValue(j);
                         newPosition[j] = currentVal + Math.abs(currentVal - nearVal) * (RNG.nextDouble() - 0.5) * 2;
                     } else {
-                        // Case 2: Leap Up (Global Search)
-                        // Uses the "best solution" found so far
+                        // Leap Up (Global Search)
+                        // NewSol(j) = swarm(i, j) + abs(swarm(i, j) - swarm(best_solution_Index, j)) * (rand - 0.5) * 2;
                         double bestVal = bestSolution.getValue(j);
                         newPosition[j] = currentVal + Math.abs(currentVal - bestVal) * (RNG.nextDouble() - 0.5) * 2;
                     }
                 }
 
-                // 4. Boundary Handling
+                // Boundary Handling
                 // "manipulate range between lb and ub"
                 task.problem.setFeasible(newPosition);
 
                 if (task.isStopCriterion()) break;
 
-                // 5. Evaluation and Update
+                // Evaluation and Update
                 NumberSolution<Double> newSol = new NumberSolution<>(Util.toDoubleArrayList(newPosition));
                 task.eval(newSol);
 
@@ -206,6 +213,10 @@ public class LO extends NumberAlgorithm {
         return bestSolution;
     }
 
+    /**
+     * Logic from intialization.m
+     * Initializes the swarm
+     */
     private void initPopulation() throws StopCriterionException {
         population = new ArrayList<>();
         for (int i = 0; i < popSize; i++) {
@@ -223,7 +234,6 @@ public class LO extends NumberAlgorithm {
     /**
      * Logic from calculateFitness.m
      * This transforms the objective value into a positive fitness score for ranking.
-     *
      */
     private double calculateFitness(double objVal) {
         if (objVal >= 0) {
