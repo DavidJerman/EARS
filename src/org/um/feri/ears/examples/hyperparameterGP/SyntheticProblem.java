@@ -121,19 +121,29 @@ class SyntheticProblem implements GPProblemWrapper {
     public GPResult runGP(GPAlgorithm algorithm, Boolean visualize)
     {
         Task<ProgramSolution, ProgramProblem> task = new Task<>(trainProblem, StopCriterion.EVALUATIONS, 10000, 0, 0);
-        try {
-            ProgramSolution solution = algorithm.execute(task);
 
-            double trainEval = solution.getEval();  // fitness on training data
-            testProblem.evaluate(solution);          // evaluate on test data
-            double testEval = solution.getEval();   // fitness on test data
+        // Try running up to 3 times
+        int c = 0;
+        while (true)
+        {
+            if (c == 3)
+                return new GPResult(Double.NaN, Double.NaN);
 
-            if (visualize) solution.getTree().displayTree(this.name, true);
+            try {
+                ProgramSolution solution = algorithm.execute(task);
 
-            return new GPResult(trainEval, testEval);
-        } catch (StopCriterionException e) {
-            e.printStackTrace();
-            return new GPResult(Double.NaN, Double.NaN);
+                double trainEval = solution.getEval();  // fitness on training data
+                testProblem.evaluate(solution);          // evaluate on test data
+                double testEval = solution.getEval();   // fitness on test data
+
+                if (visualize) solution.getTree().displayTree(this.name, true);
+
+                return new GPResult(trainEval, testEval);
+            } catch (RuntimeException | StopCriterionException e) {
+                System.out.println("Encountered an error while running GP, retrying");
+            } finally {
+                c++;
+            }
         }
     }
 }
