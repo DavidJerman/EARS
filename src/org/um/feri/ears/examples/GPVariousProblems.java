@@ -1,4 +1,4 @@
-package org.um.feri.ears.examples.hyperparameterGP;
+package org.um.feri.ears.examples;
 
 import org.um.feri.ears.algorithms.GPAlgorithm;
 import org.um.feri.ears.algorithms.gp.ElitismGPAlgorithm;
@@ -21,7 +21,7 @@ import java.util.function.Function;
 import static java.lang.Math.abs;
 import static java.lang.Math.random;
 
-public class GPSyntheticProblems {
+public class GPVariousProblems {
 
     //Define base function node types
     private static final List<Class<? extends Node>> baseFunctionNodeTypes = Arrays.asList(
@@ -218,7 +218,7 @@ public class GPSyntheticProblems {
 
         GPAlgorithm alg = new ElitismGPAlgorithm();
 
-        // Sintetični problemi
+        // Sintetični problemi (iz primera)
         VarNode.variables = List.of("x");
 
         List<SyntheticProblem> problems = Arrays.asList(
