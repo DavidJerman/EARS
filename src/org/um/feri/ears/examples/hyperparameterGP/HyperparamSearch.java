@@ -2,7 +2,6 @@ package org.um.feri.ears.examples.hyperparameterGP;
 
 import org.um.feri.ears.algorithms.GPAlgorithm;
 import org.um.feri.ears.individual.representations.gp.Node;
-import org.um.feri.ears.problems.gp.ProgramSolution;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -17,6 +16,50 @@ public class HyperparamSearch {
         }
         sb.append("]");
         return sb.toString();
+    }
+
+    private static void writeCsv(String problem,
+                                 List<Class<? extends Node>> funcSet,
+                                 List<Class<? extends Node>> terminalSet,
+                                 double trainMean, double trainStd, double trainMin, double trainMax,
+                                 double testMean, double testStd, double testMin, double testMax) {
+
+        try (var pw = new java.io.PrintWriter(new java.io.FileWriter("grid_results.csv", true))) {
+            pw.printf("%s,\"%s\",\"%s\",%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f%n",
+                    problem,
+                    setToString(funcSet),
+                    setToString(terminalSet),
+                    trainMean, trainStd, trainMin, trainMax,
+                    testMean, testStd, testMin, testMax);
+        } catch (Exception ignored) {
+        }
+    }
+
+    private static void computeStatistics(String problem,
+                                          List<Class<? extends Node>> funcSet,
+                                          List<Class<? extends Node>> terminalSet,
+                                          double[] trainResults, double[] testResults
+    ) {
+        double[] tr = iqrFilter(trainResults);
+        double[] te = iqrFilter(testResults);
+
+        double trainMean = mean(tr);
+        double trainStd = std(tr, trainMean);
+        double trainMin = min(tr);
+        double trainMax = max(tr);
+
+        double testMean = mean(te);
+        double testStd = std(te, testMean);
+        double testMin = min(te);
+        double testMax = max(te);
+
+        System.out.printf("Train: %.6f ± %.6f, Min %.6f, Max %.6f\nTest: %.6f ± %.6f, Min %.6f, Max %.6f\n",
+                trainMean, trainStd, trainMin, trainMax, testMean, testStd, testMin, testMax);
+
+        writeCsv(problem,
+                 funcSet, terminalSet,
+                 trainMean, trainStd, trainMin, trainMax,
+                 testMean, testStd, testMin, testMax);
     }
 
     public static void gridSearch(List<GPProblemWrapper> problems,
@@ -58,22 +101,30 @@ public class HyperparamSearch {
                         testResults[i] = result.testEval;
                     }
 
-                    double trainMean = mean(trainResults);
-                    double trainStd = std(trainResults, trainMean);
-                    double trainMin = min(trainResults);
-                    double trainMax = max(trainResults);
-
-                    double testMean = mean(testResults);
-                    double testStd = std(testResults, testMean);
-                    double testMin = min(testResults);
-                    double testMax = max(testResults);
-
-                    System.out.printf("Train: %.6f ± %.6f, Min %.6f, Max %.6f\nTest: %.6f ± %.6f, Min %.6f, Max %.6f\n",
-                            trainMean, trainStd, trainMin, trainMax, testMean, testStd, testMin, testMax);
+                    computeStatistics(problem.getName(), funcSet, terminalSet, trainResults, testResults);
                 }
             }
         }
     }
+
+    // This is for outlier removal
+    private static double[] iqrFilter(double[] arr) {
+        double[] a = arr.clone();
+        java.util.Arrays.sort(a);
+        int n = a.length;
+
+        double q1 = a[n / 4];
+        double q3 = a[(3 * n) / 4];
+        double iqr = q3 - q1;
+
+        double lower = q1 - 1.5 * iqr;
+        double upper = q3 + 1.5 * iqr;
+
+        return java.util.Arrays.stream(a)
+                .filter(v -> v >= lower && v <= upper)
+                .toArray();
+    }
+
 
     private static double mean(double[] arr) {
         double sum = 0;
