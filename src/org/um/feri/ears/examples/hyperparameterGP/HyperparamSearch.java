@@ -3,6 +3,9 @@ package org.um.feri.ears.examples.hyperparameterGP;
 import org.um.feri.ears.algorithms.GPAlgorithm;
 import org.um.feri.ears.individual.representations.gp.Node;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -24,7 +27,14 @@ public class HyperparamSearch {
                                  double trainMean, double trainStd, double trainMin, double trainMax,
                                  double testMean, double testStd, double testMin, double testMax) {
 
-        try (var pw = new java.io.PrintWriter(new java.io.FileWriter("grid_results.csv", true))) {
+        File file = new File("grid_results.csv");
+        boolean writeHeader = !file.exists();
+
+        try (PrintWriter pw = new PrintWriter(new FileWriter(file, true))) {
+            if (writeHeader) {
+                pw.println("Problem,FunctionSet,TerminalSet,TrainMean,TrainStd,TrainMin,TrainMax,TestMean,TestStd,TestMin,TestMax");
+            }
+
             pw.printf("%s,\"%s\",\"%s\",%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f%n",
                     problem,
                     setToString(funcSet),

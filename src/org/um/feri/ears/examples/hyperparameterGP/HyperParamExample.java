@@ -64,7 +64,27 @@ public class HyperParamExample {
                     new SyntheticProblem("Eq10", Math::sqrt, 0, 4, 0.2, false),
                     new SyntheticProblem("Eq29", x -> 0.3 * x * Math.sin(2 * Math.PI * x), -1, 1, 0.001, false),
 
-                    new CSVProblem("Real Estate", "test_data/realEstate.csv", List.of("X1", "X2", "X3", "X4", "X5", "X6"), 0.2)
+                    // New synthetic problems
+                    new SyntheticProblem("SinCosExp",
+                            x -> Math.sin(3*x) * Math.cos(2*x) + Math.exp(0.5 * x),
+                            -2, 2, 0.05, false),
+                    new SyntheticProblem("GaussMixture",
+                            x ->
+                                    0.4 * Math.exp(-Math.pow(x - 1.0, 2) / (2 * 0.2*0.2))
+                                            + 0.6 * Math.exp(-Math.pow(x + 1.0, 2) / (2 * 0.5*0.5)),
+                            -3, 3, 0.05, false),
+                    new SyntheticProblem("RationalPeriodic",
+                            x -> (x / (1 + x*x)) + 0.5 * Math.sin(5*x),
+                            -4, 4, 0.1, false),
+
+                    // Real life problem
+                    new CSVProblem("Real Estate", "test_data/realEstate.csv", List.of("X1", "X2", "X3", "X4", "X5", "X6"), 0.2),
+
+                    // Another real life problem
+                    new CSVProblem("Building Energy Efficiency",
+                            "data/energy_efficiency.csv",
+                            List.of("RelativeCompactness","SurfaceArea","WallArea","RoofArea","GlazingArea","GlazingAreaDistribution"),
+                            0.2)
             );
         } catch (IOException e) {
             throw new RuntimeException(e);
