@@ -60,9 +60,9 @@ public class HyperParamExample {
         try {
             problems = List.of(
                     // Example problems
-                    new SyntheticProblem("Eq4", x -> Math.pow(x,3) + Math.pow(x,2) + x, -1, 1, 0.1, true),
-                    new SyntheticProblem("Eq10", Math::sqrt, 0, 4, 0.2, false),
-                    new SyntheticProblem("Eq29", x -> 0.3 * x * Math.sin(2 * Math.PI * x), -1, 1, 0.001, false),
+                    // new SyntheticProblem("Eq4", x -> Math.pow(x,3) + Math.pow(x,2) + x, -1, 1, 0.1, true),
+                    // new SyntheticProblem("Eq10", Math::sqrt, 0, 4, 0.2, false),
+                    // new SyntheticProblem("Eq29", x -> 0.3 * x * Math.sin(2 * Math.PI * x), -1, 1, 0.001, false),
 
                     // New synthetic problems
                     new SyntheticProblem("SinCosExp",
@@ -78,12 +78,15 @@ public class HyperParamExample {
                             -4, 4, 0.1, false),
 
                     // Real life problem
-                    new CSVProblem("Real Estate", "test_data/realEstate.csv", List.of("X1", "X2", "X3", "X4", "X5", "X6"), 0.2),
+//                    new CSVProblem("Real Estate",
+//                            "test_data/realEstate.csv",
+//                            List.of("X1", "X2", "X3", "X4", "X5", "X6"),
+//                            0.2),
 
                     // Another real life problem
                     new CSVProblem("Building Energy Efficiency",
-                            "data/energy_efficiency.csv",
-                            List.of("RelativeCompactness","SurfaceArea","WallArea","RoofArea","GlazingArea","GlazingAreaDistribution"),
+                            "test_data/energy_efficiency.csv",
+                            List.of("X1", "X2", "X3", "X4", "X5", "X6", "X7", "X8"),
                             0.2)
             );
         } catch (IOException e) {

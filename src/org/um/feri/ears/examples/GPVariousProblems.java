@@ -35,6 +35,7 @@ public class GPVariousProblems {
     private static final List<Class<? extends Node>> baseTerminalNodeTypes = Arrays.asList(
             ConstNode.class,
             PiNode.class,
+            ENode.class,
             VarNode.class
     );
 
@@ -46,9 +47,9 @@ public class GPVariousProblems {
             SubNode.class,
             // Additional nodes
             SafePowNode.class,
-            SqrtNode.class,
             Log10Node.class,
-            AbsNode.class
+            AbsNode.class,
+            SinNode.class
     );
 
     //Define base terminal node types
@@ -199,7 +200,7 @@ public class GPVariousProblems {
         }
 
         public void runGP(GPAlgorithm algorithm, Boolean visualize) {
-            Task<ProgramSolution, ProgramProblem> task = new Task<>(trainProblem, StopCriterion.EVALUATIONS, 50000, 0, 0);
+            Task<ProgramSolution, ProgramProblem> task = new Task<>(trainProblem, StopCriterion.EVALUATIONS, 100000, 0, 0);
             try {
                 ProgramSolution solution = algorithm.execute(task);
                 System.out.println("=== " + name + " ===");
@@ -219,18 +220,18 @@ public class GPVariousProblems {
         GPAlgorithm alg = new ElitismGPAlgorithm();
 
         // Sintetični problemi (iz primera)
-        VarNode.variables = List.of("x");
-
-        List<SyntheticProblem> problems = Arrays.asList(
-                // Primeri iz SymbolicRegressionExample.java
-                new SyntheticProblem("Eq4", x -> Math.pow(x,3) + Math.pow(x,2) + x, -1, 1, 0.1, true),
-                new SyntheticProblem("Eq10", Math::sqrt, 0, 4, 0.2, false),
-                new SyntheticProblem("Eq29", x -> 0.3 * x * Math.sin(2 * Math.PI * x), -1, 1, 0.001, false)
-        );
-
-        for (SyntheticProblem p : problems) {
-            p.runGP(alg, false);
-        }
+//        VarNode.variables = List.of("x");
+//
+//        List<SyntheticProblem> problems = Arrays.asList(
+//                // Primeri iz SymbolicRegressionExample.java
+//                new SyntheticProblem("Eq4", x -> Math.pow(x,3) + Math.pow(x,2) + x, -1, 1, 0.1, true),
+//                new SyntheticProblem("Eq10", Math::sqrt, 0, 4, 0.2, false),
+//                new SyntheticProblem("Eq29", x -> 0.3 * x * Math.sin(2 * Math.PI * x), -1, 1, 0.001, false)
+//        );
+//
+//        for (SyntheticProblem p : problems) {
+//            p.runGP(alg, false);
+//        }
 
         // Realni problem - Real Estate
         VarNode.variables = List.of("X1","X2","X3","X4","X5","X6");
@@ -238,9 +239,9 @@ public class GPVariousProblems {
         CSVProblem realEstate;
         try {
             realEstate = new CSVProblem(
-                    "RealEstate",
-                    "test_data/realEstate.csv",
-                    List.of("X1","X2","X3","X4","X5","X6"),
+                    "Energy Efficiency",
+                    "test_data/energy_efficiency.csv",
+                    List.of("X1","X2","X3","X4","X5","X6","X7","X8"),
                     0.2                      // 20% test
             );
         } catch (IOException e) {
@@ -249,6 +250,6 @@ public class GPVariousProblems {
         }
 
         alg = new ElitismGPAlgorithm();
-        realEstate.runGP(alg, true);
+        realEstate.runGP(alg, false);
     }
 }
